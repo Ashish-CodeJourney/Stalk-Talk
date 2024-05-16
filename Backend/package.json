@@ -4,7 +4,7 @@
   "description": "A Chat application made using ReactJS, ExpressJS and SocketIO",
   "main": "index.js",
   "scripts": {
-    "start": "node index.js",
+    "start": "nodemon index.js",
     "dev": "nodemon index.js",
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "npm install"
@@ -13,7 +13,7 @@
     "type": "git",
     "url": "https://github.com/Ashish-CodeJourney/Stalk-Talk.git"
   },
-  "author": "Ashish <your-email@example.com>",
+  "author": "vaghelaashish111@gmail.com>",
   "license": "ISC",
   "bugs": {
     "url": "https://github.com/Ashish-CodeJourney/Stalk-Talk/issues"
