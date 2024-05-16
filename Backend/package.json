@@ -1,0 +1,38 @@
+{
+  "name": "backend",
+  "version": "1.0.0",
+  "description": "A Chat application made using ReactJS, ExpressJS and SocketIO",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "nodemon index.js",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "npm install"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Ashish-CodeJourney/Stalk-Talk.git"
+  },
+  "author": "Ashish <your-email@example.com>",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Ashish-CodeJourney/Stalk-Talk/issues"
+  },
+  "homepage": "https://github.com/Ashish-CodeJourney/Stalk-Talk#readme",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.19.2",
+    "nodemon": "^3.1.0",
+    "socket.io": "^4.7.5"
+  },
+  "keywords": [
+    "chat",
+    "react",
+    "express",
+    "socket.io",
+    "application"
+  ],
+  "engines": {
+    "node": ">=14.0.0"
+  }
+}
