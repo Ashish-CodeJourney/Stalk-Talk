@@ -2,7 +2,8 @@
 
 <img src="https://github.com/Ashish-CodeJourney/Stalk-Talk/blob/master/Frontend/src/assets/logo.png?raw=true" alt="Stal Talk Logo" width="250" height="250" align="left">
 
-![Vercel Deploy](https://deploy-badge.vercel.app/vercel/ashish-code-journey-github-io?style=plastic&logo=success)
+![Vercel Deploy](https://deploy-badge.vercel.app/vercel/stalktalk?style=plastic&name=Frontend)
+![Website Deploy](https://deploy-badge.vercel.app/?url=https%3A%2F%2Fstalk-talk.onrender.com&style=plastic&logo=Backend&name=Backend)
 
 Welcome to Stal Talk, our real-time chat application! Here's a peek into what makes our chat experience special:
 
