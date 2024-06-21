@@ -47,7 +47,7 @@ Welcome to Stal Talk, our real-time chat application! Here's a peek into what ma
 
 ## Witness the Magic
 
-Check out our [Chat App Demo](https://stalktalk.ashishcodejourney.tech/) to see Stal Talk in action!
+Check out our [Chat App Demo](https://stalktalk.vercel.app/) to see Stal Talk in action!
 
 ## Join the Conversation
 
