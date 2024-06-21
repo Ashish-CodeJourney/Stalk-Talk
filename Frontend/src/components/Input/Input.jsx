@@ -2,18 +2,17 @@ import React from "react";
 
 export default function Input({ message, setMessage, sendMessage }) {
   return (
-    <form className="flex flex-col sm:flex-row items-center p-4">
+    <form className="flex mt-4" onSubmit={sendMessage}>
       <input
-        className="border-2 border-gray-300 rounded-lg py-2 px-4 mb-2 sm:mb-0 sm:mr-2 focus:outline-none focus:border-blue-500"
+        className="flex-1 p-2 rounded-l-lg bg-gray-800 text-white outline-none focus:ring-2 focus:ring-purple-600"
         type="text"
-        placeholder="Type a message...."
         value={message}
         onChange={(e) => setMessage(e.target.value)}
-        onKeyPress={(e) => (e.key === "Enter" ? sendMessage(e) : null)}
+        placeholder="Type a message..."
       />
       <button
-        className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded w-full sm:w-auto"
-        onClick={(e) => sendMessage(e)}
+        className="p-2 bg-purple-600 rounded-r-lg hover:bg-purple-700 focus:ring-2 focus:ring-purple-600"
+        type="submit"
       >
         Send
       </button>
