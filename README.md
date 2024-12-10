@@ -4,6 +4,7 @@
 
 ![Vercel Deploy](https://deploy-badge.vercel.app/vercel/stalktalk?style=plastic&name=Frontend)
 ![Website Deploy](https://deploy-badge.vercel.app/?url=https%3A%2F%2Fstalk-talk.onrender.com&style=plastic&logo=Backend&name=Backend)
+[![CodeQL Advanced](https://github.com/Ashish-CodeJourney/Stalk-Talk/actions/workflows/codeql.yml/badge.svg)](https://github.com/Ashish-CodeJourney/Stalk-Talk/actions/workflows/codeql.yml)
 
 Welcome to Stal Talk, our real-time chat application! Here's a peek into what makes our chat experience special:
 
