@@ -52,5 +52,5 @@ Check out our [Chat App Demo](https://stalktalk.vercel.app/) to see Stal Talk in
 
 ## Join the Conversation
 
-Contributions and feedback are always welcome! Feel free to open an issue or pull request to make Stal Talk even better.
+Contributions and feedback are always welcome! Feel free to open an issue or pull request to make Stalk Talk even better.
 
