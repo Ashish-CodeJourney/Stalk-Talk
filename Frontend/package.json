@@ -21,7 +21,7 @@
     "react-scripts": "^5.0.1",
     "react-scroll-to-bottom": "^4.2.0",
     "socket.io-client": "^4.7.5",
-    "web-vitals": "^3.5.2"
+    "web-vitals": "^4.2.4"
   },
   "devDependencies": {
     "@types/react": "^18.2.66",
