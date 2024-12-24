@@ -11,6 +11,8 @@ import Root from './components/Root';
 import Home from './components/Home/Home';
 import Chatroom from './components/Chatroom/Chatroom'
 
+import { Analytics } from "@vercel/analytics/react"
+
 
 const router = createBrowserRouter(
   createRoutesFromElements(
@@ -24,5 +26,6 @@ const router = createBrowserRouter(
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
     <RouterProvider router={router} />
+      <Analytics />
   </React.StrictMode>,
 )
