@@ -1,0 +1,25 @@
+{
+  "name": "@stalk-talk/api",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch src/server.ts",
+    "build": "tsc",
+    "start": "node dist/server.js",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@fastify/cors": "^10.0.2",
+    "@stalk-talk/types": "workspace:*",
+    "fastify": "^5.3.3"
+  },
+  "devDependencies": {
+    "@stalk-talk/config": "workspace:*",
+    "@types/node": "^22.15.29",
+    "tsx": "^4.19.3",
+    "vitest": "^3.2.4"
+  }
+}
