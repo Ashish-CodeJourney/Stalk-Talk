@@ -12,12 +12,20 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@fastify/cookie": "^11.0.2",
     "@fastify/cors": "^10.0.2",
+    "@fastify/jwt": "^10.1.0",
+    "@prisma/client": "^7.8.0",
     "@stalk-talk/types": "workspace:*",
-    "fastify": "^5.3.3"
+    "bcryptjs": "^3.0.3",
+    "fastify": "^5.3.3",
+    "jsonwebtoken": "^9.0.3",
+    "prisma": "^7.8.0"
   },
   "devDependencies": {
     "@stalk-talk/config": "workspace:*",
+    "@types/bcryptjs": "^3.0.0",
+    "@types/jsonwebtoken": "^9.0.10",
     "@types/node": "^22.15.29",
     "tsx": "^4.19.3",
     "vitest": "^3.2.4"
