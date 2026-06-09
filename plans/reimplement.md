@@ -322,14 +322,14 @@ stalk-talk/
 - [ ] Frontend: `useSocket` hook, ChatRoom, MessageList, TypingIndicator
 
 ### Phase 4 — Polish + Deploy (Day 8-10)
-- [ ] Google OAuth as second provider
-- [ ] Message optimistic updates (Tanstack Query mutation)
+- [x] Google OAuth as second provider
+- [x] Message optimistic updates (socket-based, dedup on server echo)
 - [ ] Infinite scroll for message history
-- [ ] User profile page
-- [ ] Error boundaries + toast notifications
-- [ ] Rate limiting (fastify-rate-limit)
-- [ ] Deploy: Railway (api), Vercel (web)
-- [ ] Environment variable audit (12-factor)
+- [x] User profile page
+- [x] Error boundaries
+- [x] Rate limiting (fastify-rate-limit)
+- [x] Deploy: Railway (api), Vercel (web)
+- [x] Environment variable audit (12-factor)
 
 ---
 
