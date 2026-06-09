@@ -2,6 +2,8 @@ import { useState } from "react";
 import { useAuthContext } from "../auth/AuthContext.js";
 import { useSocket } from "./useSocket.js";
 import { useMessages } from "./useMessages.js";
+import { useMessageHistory } from "./useMessageHistory.js";
+import { useCombinedMessages } from "./useCombinedMessages.js";
 import { useTyping } from "./useTyping.js";
 import { MessageList } from "./MessageList.js";
 import { TypingIndicator } from "./TypingIndicator.js";
@@ -19,7 +21,9 @@ export const ChatRoom = ({ roomId }: Props) => {
   const { token, isAuthenticated } = useAuthContext();
   const socket = useSocket(token);
   const userId = token ? decodeUserId(token) : undefined;
-  const { messages, send } = useMessages(socket, roomId, userId);
+  const { messages: realtimeMessages, send } = useMessages(socket, roomId, userId);
+  const { messages: historyMessages, hasNextPage, fetchNextPage, isFetching } = useMessageHistory(roomId, token);
+  const messages = useCombinedMessages(historyMessages, realtimeMessages);
   const { typingUserIds, notifyTyping } = useTyping(socket, roomId);
   const [text, setText] = useState("");
 
@@ -34,7 +38,12 @@ export const ChatRoom = ({ roomId }: Props) => {
 
   return (
     <section>
-      <MessageList messages={messages} currentUserId={token ?? ""} />
+      {hasNextPage && (
+        <button onClick={() => fetchNextPage()} disabled={isFetching}>
+          {isFetching ? "Loading…" : "Load older messages"}
+        </button>
+      )}
+      <MessageList messages={messages} currentUserId={userId ?? ""} />
       <TypingIndicator typingUserIds={typingUserIds} />
       <form onSubmit={handleSend}>
         <input
