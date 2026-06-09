@@ -1,6 +1,12 @@
 import { defineConfig } from "vitest/config";
+import { resolve } from "path";
 
 export default defineConfig({
+  resolve: {
+    alias: {
+      "@stalk-talk/types": resolve(__dirname, "../../packages/types/src/index.ts"),
+    },
+  },
   test: {
     coverage: {
       provider: "v8",
