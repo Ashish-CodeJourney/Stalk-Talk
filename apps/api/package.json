@@ -15,6 +15,7 @@
     "@fastify/cookie": "^11.0.2",
     "@fastify/cors": "^10.0.2",
     "@fastify/jwt": "^10.1.0",
+    "@fastify/rate-limit": "^11.0.0",
     "@prisma/client": "^7.8.0",
     "@socket.io/redis-adapter": "^8.3.0",
     "@stalk-talk/types": "workspace:*",
