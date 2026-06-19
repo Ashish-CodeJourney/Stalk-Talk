@@ -43,7 +43,7 @@ const makePrisma = (overrides = {}) =>
       findUnique: vi.fn().mockResolvedValue(mockRooms[0]),
       create: vi.fn().mockResolvedValue({ id: "room-3", name: "new-room", createdAt: new Date() }),
     },
-    message: { findMany: vi.fn().mockResolvedValue(mockMessages) },
+    message: { findMany: vi.fn().mockResolvedValue(mockMessages), count: vi.fn().mockResolvedValue(0) },
     roomMember: {
       upsert: vi.fn().mockResolvedValue({}),
       deleteMany: vi.fn().mockResolvedValue({ count: 1 }),
@@ -70,6 +70,60 @@ describe("GET /rooms", () => {
     expect(res.statusCode).toBe(200);
     expect(res.json()).toHaveLength(2);
     expect(res.json()[0].name).toBe("general");
+    await app.close();
+  });
+
+  it("includes unreadCount 0 for rooms the user has not joined", async () => {
+    const prisma = makePrisma();
+    (prisma.roomMember.findMany as ReturnType<typeof vi.fn>).mockResolvedValue([]);
+    const app = buildApp({ prisma, jwtSecret: JWT_SECRET, refreshSecret: REFRESH_SECRET });
+    const res = await app.inject({ method: "GET", url: "/rooms", headers: authHeader() });
+    expect(res.json().every((r: { unreadCount: number }) => r.unreadCount === 0)).toBe(true);
+    await app.close();
+  });
+
+  it("includes unreadCount of messages created after the member's lastReadAt", async () => {
+    const prisma = makePrisma();
+    (prisma.roomMember.findMany as ReturnType<typeof vi.fn>).mockResolvedValue([
+      { roomId: "room-1", userId: "user-1", lastReadAt: new Date("2026-01-01"), joinedAt: new Date("2025-01-01") },
+    ]);
+    (prisma.message.count as ReturnType<typeof vi.fn>).mockResolvedValue(3);
+    const app = buildApp({ prisma, jwtSecret: JWT_SECRET, refreshSecret: REFRESH_SECRET });
+    const res = await app.inject({ method: "GET", url: "/rooms", headers: authHeader() });
+    const room1 = res.json().find((r: { id: string }) => r.id === "room-1");
+    expect(room1.unreadCount).toBe(3);
+    expect(prisma.message.count).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: expect.objectContaining({
+          roomId: "room-1",
+          userId: { not: "user-1" },
+          createdAt: { gt: new Date("2026-01-01") },
+        }),
+      })
+    );
+    await app.close();
+  });
+});
+
+describe("POST /rooms/:id/read", () => {
+  it("returns 401 without auth", async () => {
+    const app = buildApp({ prisma: makePrisma(), jwtSecret: JWT_SECRET, refreshSecret: REFRESH_SECRET });
+    const res = await app.inject({ method: "POST", url: "/rooms/room-1/read" });
+    expect(res.statusCode).toBe(401);
+    await app.close();
+  });
+
+  it("upserts the member's lastReadAt and returns 204", async () => {
+    const prisma = makePrisma();
+    const app = buildApp({ prisma, jwtSecret: JWT_SECRET, refreshSecret: REFRESH_SECRET });
+    const res = await app.inject({ method: "POST", url: "/rooms/room-1/read", headers: authHeader() });
+    expect(res.statusCode).toBe(204);
+    expect(prisma.roomMember.upsert).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: { userId_roomId: { userId: "user-1", roomId: "room-1" } },
+        update: expect.objectContaining({ lastReadAt: expect.any(Date) }),
+      })
+    );
     await app.close();
   });
 });

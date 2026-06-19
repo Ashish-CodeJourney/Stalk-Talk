@@ -10,11 +10,17 @@ describe("useRoomMembership", () => {
     vi.clearAllMocks();
     vi.mocked(roomApi.joinRoom).mockResolvedValue(undefined);
     vi.mocked(roomApi.leaveRoom).mockResolvedValue(undefined);
+    vi.mocked(roomApi.markRoomRead).mockResolvedValue(undefined);
   });
 
   it("joins the room automatically on mount", async () => {
     renderHook(() => useRoomMembership("token", "room-1"));
     await waitFor(() => expect(roomApi.joinRoom).toHaveBeenCalledWith("token", "room-1"));
+  });
+
+  it("marks the room as read on mount", async () => {
+    renderHook(() => useRoomMembership("token", "room-1"));
+    await waitFor(() => expect(roomApi.markRoomRead).toHaveBeenCalledWith("token", "room-1"));
   });
 
   it("does not join when token is null", () => {

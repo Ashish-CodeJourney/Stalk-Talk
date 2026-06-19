@@ -17,8 +17,27 @@ export const roomRoutes = async (app: FastifyInstance, opts: AppOptions) => {
   const { prisma, jwtSecret } = opts;
   const auth = makeAuthPreHandler(jwtSecret);
 
-  app.get("/rooms", { preHandler: auth }, async (_req, _reply) => {
-    return prisma.room.findMany({ orderBy: { createdAt: "asc" } });
+  app.get("/rooms", { preHandler: auth }, async (req, _reply) => {
+    const [rooms, memberships] = await Promise.all([
+      prisma.room.findMany({ orderBy: { createdAt: "asc" } }),
+      prisma.roomMember.findMany({ where: { userId: req.userId } }),
+    ]);
+
+    const unreadCounts = await Promise.all(
+      memberships.map(async (m) => ({
+        roomId: m.roomId,
+        unreadCount: await prisma.message.count({
+          where: {
+            roomId: m.roomId,
+            userId: { not: req.userId },
+            createdAt: { gt: m.lastReadAt ?? m.joinedAt },
+          },
+        }),
+      }))
+    );
+    const unreadByRoom = new Map(unreadCounts.map((u) => [u.roomId, u.unreadCount]));
+
+    return rooms.map((room) => ({ ...room, unreadCount: unreadByRoom.get(room.id) ?? 0 }));
   });
 
   app.post<{ Body: unknown }>("/rooms", { preHandler: auth }, async (req, reply) => {
@@ -68,6 +87,15 @@ export const roomRoutes = async (app: FastifyInstance, opts: AppOptions) => {
 
   app.delete<{ Params: { id: string } }>("/rooms/:id/leave", { preHandler: auth }, async (req, reply) => {
     await prisma.roomMember.deleteMany({ where: { userId: req.userId!, roomId: req.params.id } });
+    return reply.status(204).send();
+  });
+
+  app.post<{ Params: { id: string } }>("/rooms/:id/read", { preHandler: auth }, async (req, reply) => {
+    await prisma.roomMember.upsert({
+      where: { userId_roomId: { userId: req.userId!, roomId: req.params.id } },
+      update: { lastReadAt: new Date() },
+      create: { userId: req.userId!, roomId: req.params.id, lastReadAt: new Date() },
+    });
     return reply.status(204).send();
   });
 

@@ -37,4 +37,14 @@ describe("RoomSchema", () => {
     };
     expect(room.name).toBe("general");
   });
+
+  it("accepts a room with an unreadCount", () => {
+    const input = {
+      id: "clx000000000000000000001",
+      name: "general",
+      createdAt: new Date().toISOString(),
+      unreadCount: 5,
+    };
+    expect(RoomSchema.parse(input).unreadCount).toBe(5);
+  });
 });

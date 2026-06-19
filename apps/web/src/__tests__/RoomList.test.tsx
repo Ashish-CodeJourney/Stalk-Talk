@@ -47,7 +47,24 @@ describe("RoomList", () => {
     ]);
     wrap(<RoomList token="tok" />);
     await waitFor(() =>
-      expect(screen.getByRole("link", { name: "general" })).toBeInTheDocument()
+      expect(screen.getByRole("link", { name: /general/ })).toBeInTheDocument()
     );
+  });
+
+  it("shows an unread count badge when a room has unread messages", async () => {
+    vi.mocked(roomApi.fetchRooms).mockResolvedValue([
+      { id: "1", name: "general", createdAt: new Date().toISOString(), unreadCount: 3 },
+    ]);
+    wrap(<RoomList token="tok" />);
+    await waitFor(() => expect(screen.getByText("3")).toBeInTheDocument());
+  });
+
+  it("does not show a badge when there are no unread messages", async () => {
+    vi.mocked(roomApi.fetchRooms).mockResolvedValue([
+      { id: "1", name: "general", createdAt: new Date().toISOString(), unreadCount: 0 },
+    ]);
+    wrap(<RoomList token="tok" />);
+    await waitFor(() => expect(screen.getByText("general")).toBeInTheDocument());
+    expect(screen.queryByText("0")).not.toBeInTheDocument();
   });
 });

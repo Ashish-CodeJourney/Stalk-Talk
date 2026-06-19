@@ -16,3 +16,6 @@ export const joinRoom = (token: string, roomId: string): Promise<void> =>
 
 export const leaveRoom = (token: string, roomId: string): Promise<void> =>
   axios.delete(`${API}/rooms/${roomId}/leave`, authed(token)).then(() => undefined);
+
+export const markRoomRead = (token: string, roomId: string): Promise<void> =>
+  axios.post(`${API}/rooms/${roomId}/read`, {}, authed(token)).then(() => undefined);
