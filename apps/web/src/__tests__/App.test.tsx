@@ -13,12 +13,13 @@ describe("App", () => {
     expect(screen.getByRole("heading", { name: /stalk talk/i })).toBeInTheDocument();
   });
 
-  it("renders a login link on the home page", () => {
+  it("renders login links on the home page", () => {
     render(
       <MemoryRouter initialEntries={["/"]}>
         <App />
       </MemoryRouter>
     );
-    expect(screen.getByRole("link", { name: /sign in/i })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: /sign in with github/i })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: /sign in with google/i })).toBeInTheDocument();
   });
 });
