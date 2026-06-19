@@ -4,6 +4,12 @@ import { PrismaClient } from "@prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
 import Redis from "ioredis";
 
+try {
+  process.loadEnvFile(new URL("../.env", import.meta.url));
+} catch {
+  // .env is optional (e.g. when env vars are injected by the host)
+}
+
 const DATABASE_URL = process.env["DATABASE_URL"] ?? "postgresql://stalktalk:stalktalk@localhost:5433/stalktalk";
 const REDIS_URL = process.env["REDIS_URL"] ?? "redis://localhost:6379";
 const JWT_SECRET = process.env["JWT_SECRET"] ?? "dev-jwt-secret-change-in-production";
