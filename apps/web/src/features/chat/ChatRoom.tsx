@@ -1,6 +1,8 @@
 import { useState } from "react";
-import { Send } from "lucide-react";
+import { useNavigate, Link } from "react-router-dom";
+import { Send, ArrowLeft, LogOut } from "lucide-react";
 import { useAuthContext } from "../auth/AuthContext.js";
+import { useRoomMembership } from "../rooms/useRoomMembership.js";
 import { useSocket } from "./useSocket.js";
 import { useMessages } from "./useMessages.js";
 import { useMessageHistory } from "./useMessageHistory.js";
@@ -24,6 +26,7 @@ type Props = { roomId: string };
 
 export const ChatRoom = ({ roomId }: Props) => {
   const { token, isAuthenticated } = useAuthContext();
+  const navigate = useNavigate();
   const socket = useSocket(token);
   const userId = token ? decodeUserId(token) : undefined;
   const { messages: realtimeMessages, send } = useMessages(socket, roomId, userId);
@@ -31,6 +34,7 @@ export const ChatRoom = ({ roomId }: Props) => {
   const messages = useCombinedMessages(historyMessages, realtimeMessages);
   const { typingUserIds, notifyTyping } = useTyping(socket, roomId);
   const presentUsers = usePresence(socket);
+  const { leave } = useRoomMembership(token, roomId);
   const [text, setText] = useState("");
 
   if (!isAuthenticated) return null;
@@ -42,8 +46,25 @@ export const ChatRoom = ({ roomId }: Props) => {
     setText("");
   };
 
+  const handleLeave = async () => {
+    await leave();
+    navigate("/chat");
+  };
+
   return (
     <section className="mx-auto flex h-screen max-w-2xl flex-col">
+      <div className="flex items-center justify-between border-b border-border px-4 py-2">
+        <Button asChild variant="ghost" size="sm">
+          <Link to="/chat">
+            <ArrowLeft className="h-4 w-4" />
+            Rooms
+          </Link>
+        </Button>
+        <Button variant="ghost" size="sm" onClick={handleLeave}>
+          <LogOut className="h-4 w-4" />
+          Leave room
+        </Button>
+      </div>
       <PresenceList users={presentUsers} />
       {hasNextPage && (
         <div className="flex justify-center p-2">

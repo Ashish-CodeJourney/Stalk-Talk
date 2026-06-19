@@ -53,4 +53,32 @@ export const roomRoutes = async (app: FastifyInstance, opts: AppOptions) => {
       return { data: ordered, nextCursor };
     }
   );
+
+  app.post<{ Params: { id: string } }>("/rooms/:id/join", { preHandler: auth }, async (req, reply) => {
+    const room = await prisma.room.findUnique({ where: { id: req.params.id } });
+    if (!room) return reply.status(404).send({ error: "Room not found" });
+
+    await prisma.roomMember.upsert({
+      where: { userId_roomId: { userId: req.userId!, roomId: req.params.id } },
+      update: {},
+      create: { userId: req.userId!, roomId: req.params.id },
+    });
+    return reply.status(204).send();
+  });
+
+  app.delete<{ Params: { id: string } }>("/rooms/:id/leave", { preHandler: auth }, async (req, reply) => {
+    await prisma.roomMember.deleteMany({ where: { userId: req.userId!, roomId: req.params.id } });
+    return reply.status(204).send();
+  });
+
+  app.get<{ Params: { id: string } }>("/rooms/:id/members", { preHandler: auth }, async (req, reply) => {
+    const room = await prisma.room.findUnique({ where: { id: req.params.id } });
+    if (!room) return reply.status(404).send({ error: "Room not found" });
+
+    const members = await prisma.roomMember.findMany({
+      where: { roomId: req.params.id },
+      include: { user: { select: { id: true, username: true, avatarUrl: true } } },
+    });
+    return members.map((m) => m.user);
+  });
 };

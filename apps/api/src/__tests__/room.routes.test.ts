@@ -30,6 +30,11 @@ const mockMessages = [
   },
 ];
 
+const mockMembers = [
+  { user: { id: "user-1", username: "alice", avatarUrl: null } },
+  { user: { id: "user-2", username: "bob", avatarUrl: null } },
+];
+
 const makePrisma = (overrides = {}) =>
   ({
     user: { findUnique: vi.fn().mockResolvedValue({ id: "user-1", username: "alice" }) },
@@ -39,7 +44,11 @@ const makePrisma = (overrides = {}) =>
       create: vi.fn().mockResolvedValue({ id: "room-3", name: "new-room", createdAt: new Date() }),
     },
     message: { findMany: vi.fn().mockResolvedValue(mockMessages) },
-    roomMember: { upsert: vi.fn().mockResolvedValue({}) },
+    roomMember: {
+      upsert: vi.fn().mockResolvedValue({}),
+      deleteMany: vi.fn().mockResolvedValue({ count: 1 }),
+      findMany: vi.fn().mockResolvedValue(mockMembers),
+    },
     ...overrides,
   }) as unknown as PrismaClient;
 
@@ -166,6 +175,77 @@ describe("GET /rooms/:id/messages", () => {
       headers: authHeader(),
     });
     expect(res.statusCode).toBe(404);
+    await app.close();
+  });
+});
+
+describe("POST /rooms/:id/join", () => {
+  it("returns 401 without auth", async () => {
+    const app = buildApp({ prisma: makePrisma(), jwtSecret: JWT_SECRET, refreshSecret: REFRESH_SECRET });
+    const res = await app.inject({ method: "POST", url: "/rooms/room-1/join" });
+    expect(res.statusCode).toBe(401);
+    await app.close();
+  });
+
+  it("returns 404 when room does not exist", async () => {
+    const prisma = makePrisma();
+    (prisma.room.findUnique as ReturnType<typeof vi.fn>).mockResolvedValue(null);
+    const app = buildApp({ prisma, jwtSecret: JWT_SECRET, refreshSecret: REFRESH_SECRET });
+    const res = await app.inject({ method: "POST", url: "/rooms/nonexistent/join", headers: authHeader() });
+    expect(res.statusCode).toBe(404);
+    await app.close();
+  });
+
+  it("upserts a RoomMember row and returns 204", async () => {
+    const prisma = makePrisma();
+    const app = buildApp({ prisma, jwtSecret: JWT_SECRET, refreshSecret: REFRESH_SECRET });
+    const res = await app.inject({ method: "POST", url: "/rooms/room-1/join", headers: authHeader() });
+    expect(res.statusCode).toBe(204);
+    expect(prisma.roomMember.upsert).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: { userId_roomId: { userId: "user-1", roomId: "room-1" } },
+      })
+    );
+    await app.close();
+  });
+});
+
+describe("DELETE /rooms/:id/leave", () => {
+  it("returns 401 without auth", async () => {
+    const app = buildApp({ prisma: makePrisma(), jwtSecret: JWT_SECRET, refreshSecret: REFRESH_SECRET });
+    const res = await app.inject({ method: "DELETE", url: "/rooms/room-1/leave" });
+    expect(res.statusCode).toBe(401);
+    await app.close();
+  });
+
+  it("deletes the RoomMember row and returns 204", async () => {
+    const prisma = makePrisma();
+    const app = buildApp({ prisma, jwtSecret: JWT_SECRET, refreshSecret: REFRESH_SECRET });
+    const res = await app.inject({ method: "DELETE", url: "/rooms/room-1/leave", headers: authHeader() });
+    expect(res.statusCode).toBe(204);
+    expect(prisma.roomMember.deleteMany).toHaveBeenCalledWith({
+      where: { userId: "user-1", roomId: "room-1" },
+    });
+    await app.close();
+  });
+});
+
+describe("GET /rooms/:id/members", () => {
+  it("returns 401 without auth", async () => {
+    const app = buildApp({ prisma: makePrisma(), jwtSecret: JWT_SECRET, refreshSecret: REFRESH_SECRET });
+    const res = await app.inject({ method: "GET", url: "/rooms/room-1/members" });
+    expect(res.statusCode).toBe(401);
+    await app.close();
+  });
+
+  it("returns the list of member users", async () => {
+    const app = buildApp({ prisma: makePrisma(), jwtSecret: JWT_SECRET, refreshSecret: REFRESH_SECRET });
+    const res = await app.inject({ method: "GET", url: "/rooms/room-1/members", headers: authHeader() });
+    expect(res.statusCode).toBe(200);
+    expect(res.json()).toEqual([
+      { id: "user-1", username: "alice", avatarUrl: null },
+      { id: "user-2", username: "bob", avatarUrl: null },
+    ]);
     await app.close();
   });
 });
