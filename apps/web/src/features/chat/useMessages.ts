@@ -26,10 +26,24 @@ export const useMessages = (socket: Socket | null, roomId: string, userId?: stri
       });
     };
 
+    const onEdited = (msg: Message) => {
+      setMessages((prev) => prev.map((m) => (m.id === msg.id ? msg : m)));
+    };
+
+    const onDeleted = ({ messageId }: { messageId: string; roomId: string }) => {
+      setMessages((prev) =>
+        prev.map((m) => (m.id === messageId ? { ...m, deletedAt: new Date().toISOString() } : m))
+      );
+    };
+
     socket.on("message:new", onNew);
+    socket.on("message:edited", onEdited);
+    socket.on("message:deleted", onDeleted);
 
     return () => {
       socket.off("message:new", onNew);
+      socket.off("message:edited", onEdited);
+      socket.off("message:deleted", onDeleted);
       socket.emit("room:leave", { roomId });
       setMessages([]);
     };
@@ -48,5 +62,13 @@ export const useMessages = (socket: Socket | null, roomId: string, userId?: stri
     socket.emit("message:send", { roomId, text });
   };
 
-  return { messages, send };
+  const edit = (messageId: string, text: string) => {
+    socket?.emit("message:edit", { messageId, text });
+  };
+
+  const remove = (messageId: string) => {
+    socket?.emit("message:delete", { messageId });
+  };
+
+  return { messages, send, edit, remove };
 };

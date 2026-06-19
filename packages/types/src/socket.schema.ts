@@ -7,9 +7,19 @@ export const MessageSendPayloadSchema = z.object({
   roomId: z.string().min(1),
   text: z.string().min(1).max(2000),
 });
+export const MessageEditPayloadSchema = z.object({
+  messageId: z.string().min(1),
+  text: z.string().min(1).max(2000),
+});
+export const MessageDeletePayloadSchema = z.object({ messageId: z.string().min(1) });
 export const TypingPayloadSchema = z.object({ roomId: z.string().min(1) });
 
 export const MessageNewEventSchema = MessageSchema;
+export const MessageEditedEventSchema = MessageSchema;
+export const MessageDeletedEventSchema = z.object({
+  messageId: z.string().min(1),
+  roomId: z.string().min(1),
+});
 export const PresenceUserSchema = z.object({
   id: z.string().min(1),
   username: z.string().min(1),
@@ -32,8 +42,12 @@ export const SocketErrorSchema = z.object({
 export type RoomJoinPayload = z.infer<typeof RoomJoinPayloadSchema>;
 export type RoomLeavePayload = z.infer<typeof RoomLeavePayloadSchema>;
 export type MessageSendPayload = z.infer<typeof MessageSendPayloadSchema>;
+export type MessageEditPayload = z.infer<typeof MessageEditPayloadSchema>;
+export type MessageDeletePayload = z.infer<typeof MessageDeletePayloadSchema>;
 export type TypingPayload = z.infer<typeof TypingPayloadSchema>;
 export type MessageNewEvent = z.infer<typeof MessageNewEventSchema>;
+export type MessageEditedEvent = z.infer<typeof MessageEditedEventSchema>;
+export type MessageDeletedEvent = z.infer<typeof MessageDeletedEventSchema>;
 export type PresenceUser = z.infer<typeof PresenceUserSchema>;
 export type RoomUsersEvent = z.infer<typeof RoomUsersEventSchema>;
 export type TypingUpdateEvent = z.infer<typeof TypingUpdateEventSchema>;

@@ -3,8 +3,12 @@ import {
   RoomJoinPayloadSchema,
   RoomLeavePayloadSchema,
   MessageSendPayloadSchema,
+  MessageEditPayloadSchema,
+  MessageDeletePayloadSchema,
   TypingPayloadSchema,
   MessageNewEventSchema,
+  MessageEditedEventSchema,
+  MessageDeletedEventSchema,
   RoomUsersEventSchema,
   TypingUpdateEventSchema,
   SocketErrorSchema,
@@ -34,6 +38,19 @@ describe("Socket event schemas — client to server", () => {
 
   it("accepts a valid typing payload", () => {
     expect(TypingPayloadSchema.parse({ roomId: "clx01" })).toEqual({ roomId: "clx01" });
+  });
+
+  it("accepts a valid message:edit payload", () => {
+    const payload = { messageId: "clx02", text: "updated" };
+    expect(MessageEditPayloadSchema.parse(payload)).toEqual(payload);
+  });
+
+  it("rejects message:edit with empty text", () => {
+    expect(() => MessageEditPayloadSchema.parse({ messageId: "clx02", text: "" })).toThrow();
+  });
+
+  it("accepts a valid message:delete payload", () => {
+    expect(MessageDeletePayloadSchema.parse({ messageId: "clx02" })).toEqual({ messageId: "clx02" });
   });
 });
 
@@ -73,5 +90,22 @@ describe("Socket event schemas — server to client", () => {
   it("accepts a socket error with code and message", () => {
     const err = { code: "UNAUTHORIZED", message: "Token expired" };
     expect(SocketErrorSchema.parse(err)).toMatchObject(err);
+  });
+
+  it("accepts a valid message:edited event", () => {
+    const event = {
+      id: "clx02",
+      text: "updated",
+      userId: "clx00",
+      roomId: "clx01",
+      createdAt: new Date().toISOString(),
+      editedAt: new Date().toISOString(),
+    };
+    expect(MessageEditedEventSchema.parse(event)).toMatchObject({ text: "updated" });
+  });
+
+  it("accepts a valid message:deleted event", () => {
+    const event = { messageId: "clx02", roomId: "clx01" };
+    expect(MessageDeletedEventSchema.parse(event)).toEqual(event);
   });
 });

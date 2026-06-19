@@ -29,7 +29,7 @@ export const ChatRoom = ({ roomId }: Props) => {
   const navigate = useNavigate();
   const socket = useSocket(token);
   const userId = token ? decodeUserId(token) : undefined;
-  const { messages: realtimeMessages, send } = useMessages(socket, roomId, userId);
+  const { messages: realtimeMessages, send, edit, remove } = useMessages(socket, roomId, userId);
   const { messages: historyMessages, hasNextPage, fetchNextPage, isFetching } = useMessageHistory(roomId, token);
   const messages = useCombinedMessages(historyMessages, realtimeMessages);
   const { typingUserIds, notifyTyping } = useTyping(socket, roomId);
@@ -73,7 +73,7 @@ export const ChatRoom = ({ roomId }: Props) => {
           </Button>
         </div>
       )}
-      <MessageList messages={messages} currentUserId={userId ?? ""} />
+      <MessageList messages={messages} currentUserId={userId ?? ""} onEdit={edit} onDelete={remove} />
       <TypingIndicator typingUserIds={typingUserIds} />
       <form onSubmit={handleSend} className="flex gap-2 border-t border-border p-4">
         <Input

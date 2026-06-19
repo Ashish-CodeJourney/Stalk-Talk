@@ -26,17 +26,21 @@ const makeIo = () => {
   return { to: vi.fn().mockReturnValue(toMock), _toMock: toMock };
 };
 
+const mockMessage = {
+  id: "msg-1",
+  text: "hello",
+  userId: "user-1",
+  roomId: "room-1",
+  createdAt: new Date(),
+  user: { id: "user-1", username: "alice", avatarUrl: null },
+};
+
 const makePrisma = () =>
   ({
     message: {
-      create: vi.fn().mockResolvedValue({
-        id: "msg-1",
-        text: "hello",
-        userId: "user-1",
-        roomId: "room-1",
-        createdAt: new Date(),
-        user: { id: "user-1", username: "alice", avatarUrl: null },
-      }),
+      create: vi.fn().mockResolvedValue(mockMessage),
+      findUnique: vi.fn().mockResolvedValue(mockMessage),
+      update: vi.fn().mockResolvedValue({ ...mockMessage, text: "edited", editedAt: new Date() }),
     },
     room: { findUnique: vi.fn().mockResolvedValue({ id: "room-1", name: "general" }) },
     user: {
@@ -133,6 +137,46 @@ describe("message.handler — onSend", () => {
     const { onSend } = makeMessageHandler(io as never, makePrisma());
     await onSend(socket as never, { roomId: "room-1", text: "" });
     expect(socket.emit).toHaveBeenCalledWith("error", expect.objectContaining({ code: "INVALID_MESSAGE" }));
+  });
+});
+
+describe("message.handler — onEdit", () => {
+  it("edits the message and emits message:edited to the room", async () => {
+    const socket = makeSocket();
+    const io = makeIo();
+    const prisma = makePrisma();
+    const { onEdit } = makeMessageHandler(io as never, prisma);
+    await onEdit(socket as never, { messageId: "msg-1", text: "edited" });
+    expect(io.to).toHaveBeenCalledWith("room-1");
+    expect(io._toMock.emit).toHaveBeenCalledWith("message:edited", expect.objectContaining({ text: "edited" }));
+  });
+
+  it("emits an error when the requester is not the author", async () => {
+    const socket = makeSocket("user-2");
+    const io = makeIo();
+    const { onEdit } = makeMessageHandler(io as never, makePrisma());
+    await onEdit(socket as never, { messageId: "msg-1", text: "edited" });
+    expect(socket.emit).toHaveBeenCalledWith("error", expect.objectContaining({ code: "NOT_AUTHORIZED" }));
+  });
+});
+
+describe("message.handler — onDelete", () => {
+  it("soft-deletes the message and emits message:deleted to the room", async () => {
+    const socket = makeSocket();
+    const io = makeIo();
+    const prisma = makePrisma();
+    const { onDelete } = makeMessageHandler(io as never, prisma);
+    await onDelete(socket as never, { messageId: "msg-1" });
+    expect(io.to).toHaveBeenCalledWith("room-1");
+    expect(io._toMock.emit).toHaveBeenCalledWith("message:deleted", { messageId: "msg-1", roomId: "room-1" });
+  });
+
+  it("emits an error when the requester is not the author", async () => {
+    const socket = makeSocket("user-2");
+    const io = makeIo();
+    const { onDelete } = makeMessageHandler(io as never, makePrisma());
+    await onDelete(socket as never, { messageId: "msg-1" });
+    expect(socket.emit).toHaveBeenCalledWith("error", expect.objectContaining({ code: "NOT_AUTHORIZED" }));
   });
 });
 

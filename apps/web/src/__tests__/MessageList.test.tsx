@@ -1,5 +1,5 @@
-import { describe, it, expect } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { describe, it, expect, vi } from "vitest";
+import { render, screen, fireEvent } from "@testing-library/react";
 import { MessageList } from "../features/chat/MessageList.js";
 import type { Message } from "@stalk-talk/types";
 
@@ -40,5 +40,47 @@ describe("MessageList", () => {
     render(<MessageList messages={messages} currentUserId="user-1" />);
     const item = screen.getByText("Their message").closest("li");
     expect(item?.className).not.toMatch(/own/);
+  });
+
+  it("shows an edited marker for messages with editedAt set", () => {
+    const messages = [makeMessage({ text: "Updated", editedAt: new Date().toISOString() })];
+    render(<MessageList messages={messages} currentUserId="user-1" />);
+    expect(screen.getByText(/edited/i)).toBeInTheDocument();
+  });
+
+  it("shows a deleted placeholder instead of the text for deleted messages", () => {
+    const messages = [makeMessage({ text: "secret", deletedAt: new Date().toISOString() })];
+    render(<MessageList messages={messages} currentUserId="user-1" />);
+    expect(screen.queryByText("secret")).not.toBeInTheDocument();
+    expect(screen.getByText(/message deleted/i)).toBeInTheDocument();
+  });
+
+  it("shows edit and delete controls only for the current user's own messages", () => {
+    const messages = [
+      makeMessage({ id: "own", userId: "user-1", text: "Mine" }),
+      makeMessage({ id: "other", userId: "user-2", text: "Theirs" }),
+    ];
+    render(<MessageList messages={messages} currentUserId="user-1" />);
+    expect(screen.getAllByRole("button", { name: /edit/i })).toHaveLength(1);
+    expect(screen.getAllByRole("button", { name: /delete/i })).toHaveLength(1);
+  });
+
+  it("calls onEdit with the new text when an edit is submitted", () => {
+    const onEdit = vi.fn();
+    const messages = [makeMessage({ id: "msg-1", userId: "user-1", text: "Mine" })];
+    render(<MessageList messages={messages} currentUserId="user-1" onEdit={onEdit} />);
+    fireEvent.click(screen.getByRole("button", { name: /edit/i }));
+    const input = screen.getByDisplayValue("Mine");
+    fireEvent.change(input, { target: { value: "Mine, edited" } });
+    fireEvent.submit(input);
+    expect(onEdit).toHaveBeenCalledWith("msg-1", "Mine, edited");
+  });
+
+  it("calls onDelete when the delete button is clicked", () => {
+    const onDelete = vi.fn();
+    const messages = [makeMessage({ id: "msg-1", userId: "user-1", text: "Mine" })];
+    render(<MessageList messages={messages} currentUserId="user-1" onDelete={onDelete} />);
+    fireEvent.click(screen.getByRole("button", { name: /delete/i }));
+    expect(onDelete).toHaveBeenCalledWith("msg-1");
   });
 });

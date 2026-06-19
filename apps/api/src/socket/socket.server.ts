@@ -7,7 +7,6 @@ import { verifyAccessToken } from "../services/token.service.js";
 import { makeRoomHandlers } from "./handlers/room.handler.js";
 import { makeMessageHandler } from "./handlers/message.handler.js";
 import { makeTypingHandlers } from "./handlers/typing.handler.js";
-import { setUserOffline } from "../services/presence.service.js";
 
 type SocketServerOptions = {
   httpServer: HttpServer;
@@ -54,14 +53,15 @@ export const createSocketServer = ({
     socket.on("room:join", (payload) => roomHandlers.onJoin(socket, payload));
     socket.on("room:leave", (payload) => roomHandlers.onLeave(socket, payload));
     socket.on("message:send", (payload) => messageHandler.onSend(socket, payload));
+    socket.on("message:edit", (payload) => messageHandler.onEdit(socket, payload));
+    socket.on("message:delete", (payload) => messageHandler.onDelete(socket, payload));
     socket.on("typing:start", (payload) => typingHandlers.onTypingStart(socket, payload));
     socket.on("typing:stop", (payload) => typingHandlers.onTypingStop(socket, payload));
 
     socket.on("disconnecting", async () => {
       for (const roomId of socket.rooms) {
         if (roomId !== socket.id && socket.userId) {
-          await setUserOffline(redis, roomId, socket.userId);
-          io.to(roomId).emit("room:users", { roomId, userIds: [] });
+          await roomHandlers.onLeave(socket, { roomId });
         }
       }
     });

@@ -52,4 +52,39 @@ describe("useMessages", () => {
     expect(result.current.messages).toHaveLength(1);
     expect(result.current.messages[0]?.id).toBe("m-server");
   });
+
+  it("emits message:edit when edit() is called", () => {
+    const { result } = renderHook(() => useMessages(socket, "r1", "u1"));
+    act(() => result.current.edit("m1", "updated text"));
+    expect(socket.emit).toHaveBeenCalledWith("message:edit", { messageId: "m1", text: "updated text" });
+  });
+
+  it("updates the message text in place when message:edited is received", () => {
+    const { result } = renderHook(() => useMessages(socket, "r1", "u1"));
+    const onNew = vi.mocked(socket.on).mock.calls.find(([e]) => e === "message:new")?.[1] as (m: typeof MSG) => void;
+    act(() => onNew(MSG));
+    const onEdited = vi.mocked(socket.on).mock.calls.find(([e]) => e === "message:edited")?.[1] as (
+      m: typeof MSG & { editedAt: string }
+    ) => void;
+    act(() => onEdited({ ...MSG, text: "updated text", editedAt: new Date().toISOString() }));
+    expect(result.current.messages[0]?.text).toBe("updated text");
+    expect(result.current.messages[0]?.editedAt).toBeDefined();
+  });
+
+  it("emits message:delete when remove() is called", () => {
+    const { result } = renderHook(() => useMessages(socket, "r1", "u1"));
+    act(() => result.current.remove("m1"));
+    expect(socket.emit).toHaveBeenCalledWith("message:delete", { messageId: "m1" });
+  });
+
+  it("marks the message as deleted in place when message:deleted is received", () => {
+    const { result } = renderHook(() => useMessages(socket, "r1", "u1"));
+    const onNew = vi.mocked(socket.on).mock.calls.find(([e]) => e === "message:new")?.[1] as (m: typeof MSG) => void;
+    act(() => onNew(MSG));
+    const onDeleted = vi.mocked(socket.on).mock.calls.find(([e]) => e === "message:deleted")?.[1] as (
+      e: { messageId: string; roomId: string }
+    ) => void;
+    act(() => onDeleted({ messageId: "m1", roomId: "r1" }));
+    expect(result.current.messages[0]?.deletedAt).toBeDefined();
+  });
 });
