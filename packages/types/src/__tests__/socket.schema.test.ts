@@ -49,21 +49,20 @@ describe("Socket event schemas — server to client", () => {
     expect(MessageNewEventSchema.parse(event)).toMatchObject({ text: "Hello" });
   });
 
-  it("accepts a valid room:users event", () => {
+  it("accepts a valid room:users event with public-safe user fields only", () => {
     const event = {
       roomId: "clx01",
-      users: [
-        {
-          id: "clx00",
-          email: "a@b.com",
-          username: "alice",
-          provider: "github",
-          providerId: "1",
-          createdAt: new Date().toISOString(),
-        },
-      ],
+      users: [{ id: "clx00", username: "alice", avatarUrl: null }],
     };
     expect(RoomUsersEventSchema.parse(event).users).toHaveLength(1);
+  });
+
+  it("rejects room:users containing private fields like email", () => {
+    const event = {
+      roomId: "clx01",
+      users: [{ id: "clx00", username: "alice", avatarUrl: null, email: "a@b.com" }],
+    };
+    expect(RoomUsersEventSchema.parse(event).users[0]).not.toHaveProperty("email");
   });
 
   it("accepts a valid typing:update event", () => {

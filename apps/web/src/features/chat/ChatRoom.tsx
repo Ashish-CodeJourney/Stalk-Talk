@@ -6,8 +6,10 @@ import { useMessages } from "./useMessages.js";
 import { useMessageHistory } from "./useMessageHistory.js";
 import { useCombinedMessages } from "./useCombinedMessages.js";
 import { useTyping } from "./useTyping.js";
+import { usePresence } from "./usePresence.js";
 import { MessageList } from "./MessageList.js";
 import { TypingIndicator } from "./TypingIndicator.js";
+import { PresenceList } from "./PresenceList.js";
 import { Button } from "@/components/ui/button.js";
 import { Input } from "@/components/ui/input.js";
 
@@ -28,6 +30,7 @@ export const ChatRoom = ({ roomId }: Props) => {
   const { messages: historyMessages, hasNextPage, fetchNextPage, isFetching } = useMessageHistory(roomId, token);
   const messages = useCombinedMessages(historyMessages, realtimeMessages);
   const { typingUserIds, notifyTyping } = useTyping(socket, roomId);
+  const presentUsers = usePresence(socket);
   const [text, setText] = useState("");
 
   if (!isAuthenticated) return null;
@@ -41,6 +44,7 @@ export const ChatRoom = ({ roomId }: Props) => {
 
   return (
     <section className="mx-auto flex h-screen max-w-2xl flex-col">
+      <PresenceList users={presentUsers} />
       {hasNextPage && (
         <div className="flex justify-center p-2">
           <Button variant="ghost" size="sm" onClick={() => fetchNextPage()} disabled={isFetching}>

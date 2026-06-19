@@ -39,6 +39,11 @@ const makePrisma = () =>
       }),
     },
     room: { findUnique: vi.fn().mockResolvedValue({ id: "room-1", name: "general" }) },
+    user: {
+      findMany: vi.fn().mockResolvedValue([
+        { id: "user-1", username: "alice", avatarUrl: null },
+      ]),
+    },
   }) as unknown as PrismaClient;
 
 const makeRedis = () =>
@@ -66,6 +71,17 @@ describe("room.handler — onJoin", () => {
     expect(io._toMock.emit).toHaveBeenCalledWith(
       "room:users",
       expect.objectContaining({ roomId: "room-1" })
+    );
+  });
+
+  it("emits room:users with full user objects, not raw IDs", async () => {
+    const socket = makeSocket();
+    const io = makeIo();
+    const { onJoin } = makeRoomHandlers(io as never, makePrisma(), makeRedis());
+    await onJoin(socket as never, { roomId: "room-1" });
+    expect(io._toMock.emit).toHaveBeenCalledWith(
+      "room:users",
+      { roomId: "room-1", users: [{ id: "user-1", username: "alice", avatarUrl: null }] }
     );
   });
 

@@ -9,9 +9,13 @@ declare module "socket.io" {
   }
 }
 
-const broadcastRoomUsers = async (io: Server, redis: Redis, roomId: string) => {
+const broadcastRoomUsers = async (io: Server, prisma: PrismaClient, redis: Redis, roomId: string) => {
   const userIds = await getOnlineUserIds(redis, roomId);
-  io.to(roomId).emit("room:users", { roomId, userIds });
+  const users = await prisma.user.findMany({
+    where: { id: { in: userIds } },
+    select: { id: true, username: true, avatarUrl: true },
+  });
+  io.to(roomId).emit("room:users", { roomId, users });
 };
 
 export const makeRoomHandlers = (io: Server, prisma: PrismaClient, redis: Redis) => {
@@ -24,14 +28,14 @@ export const makeRoomHandlers = (io: Server, prisma: PrismaClient, redis: Redis)
     }
     socket.join(roomId);
     if (socket.userId) await setUserOnline(redis, roomId, socket.userId);
-    await broadcastRoomUsers(io, redis, roomId);
+    await broadcastRoomUsers(io, prisma, redis, roomId);
   };
 
   const onLeave = async (socket: Socket, payload: { roomId: string }) => {
     const { roomId } = payload;
     socket.leave(roomId);
     if (socket.userId) await setUserOffline(redis, roomId, socket.userId);
-    await broadcastRoomUsers(io, redis, roomId);
+    await broadcastRoomUsers(io, prisma, redis, roomId);
   };
 
   return { onJoin, onLeave };
