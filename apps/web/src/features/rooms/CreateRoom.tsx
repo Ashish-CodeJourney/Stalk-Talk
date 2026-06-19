@@ -1,6 +1,8 @@
 import { useState } from "react";
 import type { Room } from "@stalk-talk/types";
 import { createRoom } from "./room.api.js";
+import { Input } from "@/components/ui/input.js";
+import { Button } from "@/components/ui/button.js";
 
 type Props = { token: string; onCreated: (room: Room) => void };
 
@@ -27,12 +29,12 @@ export const CreateRoom = ({ token, onCreated }: Props) => {
   };
 
   return (
-    <form onSubmit={handleSubmit}>
-      <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Room name" />
-      {error && <p>{error}</p>}
-      <button type="submit" disabled={submitting}>
+    <form onSubmit={handleSubmit} className="flex flex-col gap-2 rounded-md border border-border bg-card p-4">
+      <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="Room name" />
+      {error && <p className="text-sm text-destructive">{error}</p>}
+      <Button type="submit" disabled={submitting}>
         Create room
-      </button>
+      </Button>
     </form>
   );
 };

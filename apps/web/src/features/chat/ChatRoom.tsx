@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Send } from "lucide-react";
 import { useAuthContext } from "../auth/AuthContext.js";
 import { useSocket } from "./useSocket.js";
 import { useMessages } from "./useMessages.js";
@@ -7,6 +8,8 @@ import { useCombinedMessages } from "./useCombinedMessages.js";
 import { useTyping } from "./useTyping.js";
 import { MessageList } from "./MessageList.js";
 import { TypingIndicator } from "./TypingIndicator.js";
+import { Button } from "@/components/ui/button.js";
+import { Input } from "@/components/ui/input.js";
 
 const decodeUserId = (token: string): string | undefined => {
   try {
@@ -37,21 +40,25 @@ export const ChatRoom = ({ roomId }: Props) => {
   };
 
   return (
-    <section>
+    <section className="mx-auto flex h-screen max-w-2xl flex-col">
       {hasNextPage && (
-        <button onClick={() => fetchNextPage()} disabled={isFetching}>
-          {isFetching ? "Loading…" : "Load older messages"}
-        </button>
+        <div className="flex justify-center p-2">
+          <Button variant="ghost" size="sm" onClick={() => fetchNextPage()} disabled={isFetching}>
+            {isFetching ? "Loading…" : "Load older messages"}
+          </Button>
+        </div>
       )}
       <MessageList messages={messages} currentUserId={userId ?? ""} />
       <TypingIndicator typingUserIds={typingUserIds} />
-      <form onSubmit={handleSend}>
-        <input
+      <form onSubmit={handleSend} className="flex gap-2 border-t border-border p-4">
+        <Input
           value={text}
           onChange={(e) => { setText(e.target.value); notifyTyping(); }}
           placeholder="Type a message…"
         />
-        <button type="submit" disabled={!text.trim()}>Send</button>
+        <Button type="submit" disabled={!text.trim()} size="icon">
+          <Send className="h-4 w-4" />
+        </Button>
       </form>
     </section>
   );
