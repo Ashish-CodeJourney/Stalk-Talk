@@ -69,4 +69,16 @@ describe("MessageSchema", () => {
     };
     expect(MessageSchema.parse(input).deletedAt).toBeDefined();
   });
+
+  it("accepts a message with reactions attached", () => {
+    const input = {
+      id: "clx000000000000000000002",
+      text: "Hello world",
+      userId: "clx000000000000000000000",
+      roomId: "clx000000000000000000001",
+      createdAt: new Date().toISOString(),
+      reactions: [{ emoji: "👍", userIds: ["clx000000000000000000000"] }],
+    };
+    expect(MessageSchema.parse(input).reactions).toHaveLength(1);
+  });
 });

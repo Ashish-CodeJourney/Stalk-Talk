@@ -16,8 +16,9 @@ model User {
   refreshToken String?
   createdAt    DateTime @default(now())
 
-  rooms    RoomMember[]
-  messages Message[]
+  rooms     RoomMember[]
+  messages  Message[]
+  reactions Reaction[]
 
   @@unique([provider, providerId])
 }
@@ -52,6 +53,20 @@ model Message {
   editedAt  DateTime?
   deletedAt DateTime?
 
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-  room Room @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  room      Room       @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  reactions Reaction[]
+}
+
+model Reaction {
+  id        String   @id @default(cuid())
+  emoji     String
+  userId    String
+  messageId String
+  createdAt DateTime @default(now())
+
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  message Message @relation(fields: [messageId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, messageId, emoji])
 }

@@ -5,10 +5,12 @@ import {
   MessageSendPayloadSchema,
   MessageEditPayloadSchema,
   MessageDeletePayloadSchema,
+  ReactionPayloadSchema,
   TypingPayloadSchema,
   MessageNewEventSchema,
   MessageEditedEventSchema,
   MessageDeletedEventSchema,
+  ReactionUpdatedEventSchema,
   RoomUsersEventSchema,
   TypingUpdateEventSchema,
   SocketErrorSchema,
@@ -51,6 +53,15 @@ describe("Socket event schemas — client to server", () => {
 
   it("accepts a valid message:delete payload", () => {
     expect(MessageDeletePayloadSchema.parse({ messageId: "clx02" })).toEqual({ messageId: "clx02" });
+  });
+
+  it("accepts a valid reaction payload", () => {
+    const payload = { messageId: "clx02", emoji: "👍" };
+    expect(ReactionPayloadSchema.parse(payload)).toEqual(payload);
+  });
+
+  it("rejects a reaction payload with empty emoji", () => {
+    expect(() => ReactionPayloadSchema.parse({ messageId: "clx02", emoji: "" })).toThrow();
   });
 });
 
@@ -107,5 +118,14 @@ describe("Socket event schemas — server to client", () => {
   it("accepts a valid message:deleted event", () => {
     const event = { messageId: "clx02", roomId: "clx01" };
     expect(MessageDeletedEventSchema.parse(event)).toEqual(event);
+  });
+
+  it("accepts a valid reaction:updated event", () => {
+    const event = {
+      messageId: "clx02",
+      roomId: "clx01",
+      reactions: [{ emoji: "👍", userIds: ["clx00"] }],
+    };
+    expect(ReactionUpdatedEventSchema.parse(event).reactions).toHaveLength(1);
   });
 });

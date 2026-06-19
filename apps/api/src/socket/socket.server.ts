@@ -6,6 +6,7 @@ import { createAdapter } from "@socket.io/redis-adapter";
 import { verifyAccessToken } from "../services/token.service.js";
 import { makeRoomHandlers } from "./handlers/room.handler.js";
 import { makeMessageHandler } from "./handlers/message.handler.js";
+import { makeReactionHandler } from "./handlers/reaction.handler.js";
 import { makeTypingHandlers } from "./handlers/typing.handler.js";
 
 type SocketServerOptions = {
@@ -47,6 +48,7 @@ export const createSocketServer = ({
 
   const roomHandlers = makeRoomHandlers(io, prisma, redis);
   const messageHandler = makeMessageHandler(io, prisma);
+  const reactionHandler = makeReactionHandler(io, prisma);
   const typingHandlers = makeTypingHandlers();
 
   io.on("connection", (socket) => {
@@ -55,6 +57,7 @@ export const createSocketServer = ({
     socket.on("message:send", (payload) => messageHandler.onSend(socket, payload));
     socket.on("message:edit", (payload) => messageHandler.onEdit(socket, payload));
     socket.on("message:delete", (payload) => messageHandler.onDelete(socket, payload));
+    socket.on("reaction:toggle", (payload) => reactionHandler.onToggle(socket, payload));
     socket.on("typing:start", (payload) => typingHandlers.onTypingStart(socket, payload));
     socket.on("typing:stop", (payload) => typingHandlers.onTypingStop(socket, payload));
 

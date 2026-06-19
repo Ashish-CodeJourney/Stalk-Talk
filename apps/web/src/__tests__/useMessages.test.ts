@@ -87,4 +87,21 @@ describe("useMessages", () => {
     act(() => onDeleted({ messageId: "m1", roomId: "r1" }));
     expect(result.current.messages[0]?.deletedAt).toBeDefined();
   });
+
+  it("emits reaction:toggle when react() is called", () => {
+    const { result } = renderHook(() => useMessages(socket, "r1", "u1"));
+    act(() => result.current.react("m1", "👍"));
+    expect(socket.emit).toHaveBeenCalledWith("reaction:toggle", { messageId: "m1", emoji: "👍" });
+  });
+
+  it("updates the message's reactions in place when reaction:updated is received", () => {
+    const { result } = renderHook(() => useMessages(socket, "r1", "u1"));
+    const onNew = vi.mocked(socket.on).mock.calls.find(([e]) => e === "message:new")?.[1] as (m: typeof MSG) => void;
+    act(() => onNew(MSG));
+    const onReactionUpdated = vi.mocked(socket.on).mock.calls.find(([e]) => e === "reaction:updated")?.[1] as (
+      e: { messageId: string; roomId: string; reactions: { emoji: string; userIds: string[] }[] }
+    ) => void;
+    act(() => onReactionUpdated({ messageId: "m1", roomId: "r1", reactions: [{ emoji: "👍", userIds: ["u1"] }] }));
+    expect(result.current.messages[0]?.reactions).toEqual([{ emoji: "👍", userIds: ["u1"] }]);
+  });
 });

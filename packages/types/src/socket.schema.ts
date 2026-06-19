@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { MessageSchema } from "./message.schema.js";
+import { MessageSchema, ReactionSummarySchema } from "./message.schema.js";
 
 export const RoomJoinPayloadSchema = z.object({ roomId: z.string().min(1) });
 export const RoomLeavePayloadSchema = z.object({ roomId: z.string().min(1) });
@@ -12,6 +12,10 @@ export const MessageEditPayloadSchema = z.object({
   text: z.string().min(1).max(2000),
 });
 export const MessageDeletePayloadSchema = z.object({ messageId: z.string().min(1) });
+export const ReactionPayloadSchema = z.object({
+  messageId: z.string().min(1),
+  emoji: z.string().min(1),
+});
 export const TypingPayloadSchema = z.object({ roomId: z.string().min(1) });
 
 export const MessageNewEventSchema = MessageSchema;
@@ -19,6 +23,11 @@ export const MessageEditedEventSchema = MessageSchema;
 export const MessageDeletedEventSchema = z.object({
   messageId: z.string().min(1),
   roomId: z.string().min(1),
+});
+export const ReactionUpdatedEventSchema = z.object({
+  messageId: z.string().min(1),
+  roomId: z.string().min(1),
+  reactions: z.array(ReactionSummarySchema),
 });
 export const PresenceUserSchema = z.object({
   id: z.string().min(1),
@@ -44,10 +53,12 @@ export type RoomLeavePayload = z.infer<typeof RoomLeavePayloadSchema>;
 export type MessageSendPayload = z.infer<typeof MessageSendPayloadSchema>;
 export type MessageEditPayload = z.infer<typeof MessageEditPayloadSchema>;
 export type MessageDeletePayload = z.infer<typeof MessageDeletePayloadSchema>;
+export type ReactionPayload = z.infer<typeof ReactionPayloadSchema>;
 export type TypingPayload = z.infer<typeof TypingPayloadSchema>;
 export type MessageNewEvent = z.infer<typeof MessageNewEventSchema>;
 export type MessageEditedEvent = z.infer<typeof MessageEditedEventSchema>;
 export type MessageDeletedEvent = z.infer<typeof MessageDeletedEventSchema>;
+export type ReactionUpdatedEvent = z.infer<typeof ReactionUpdatedEventSchema>;
 export type PresenceUser = z.infer<typeof PresenceUserSchema>;
 export type RoomUsersEvent = z.infer<typeof RoomUsersEventSchema>;
 export type TypingUpdateEvent = z.infer<typeof TypingUpdateEventSchema>;

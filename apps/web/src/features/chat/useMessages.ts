@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import type { Socket } from "socket.io-client";
-import type { Message } from "@stalk-talk/types";
+import type { Message, ReactionSummary } from "@stalk-talk/types";
 
 const OPTIMISTIC_PREFIX = "__opt__";
 
@@ -36,14 +36,20 @@ export const useMessages = (socket: Socket | null, roomId: string, userId?: stri
       );
     };
 
+    const onReactionUpdated = ({ messageId, reactions }: { messageId: string; roomId: string; reactions: ReactionSummary[] }) => {
+      setMessages((prev) => prev.map((m) => (m.id === messageId ? { ...m, reactions } : m)));
+    };
+
     socket.on("message:new", onNew);
     socket.on("message:edited", onEdited);
     socket.on("message:deleted", onDeleted);
+    socket.on("reaction:updated", onReactionUpdated);
 
     return () => {
       socket.off("message:new", onNew);
       socket.off("message:edited", onEdited);
       socket.off("message:deleted", onDeleted);
+      socket.off("reaction:updated", onReactionUpdated);
       socket.emit("room:leave", { roomId });
       setMessages([]);
     };
@@ -70,5 +76,9 @@ export const useMessages = (socket: Socket | null, roomId: string, userId?: stri
     socket?.emit("message:delete", { messageId });
   };
 
-  return { messages, send, edit, remove };
+  const react = (messageId: string, emoji: string) => {
+    socket?.emit("reaction:toggle", { messageId, emoji });
+  };
+
+  return { messages, send, edit, remove, react };
 };

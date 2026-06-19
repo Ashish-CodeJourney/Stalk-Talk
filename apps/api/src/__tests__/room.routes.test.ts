@@ -19,6 +19,7 @@ const mockMessages = [
     roomId: "room-1",
     createdAt: new Date(),
     user: { id: "user-2", username: "bob", avatarUrl: null },
+    reactions: [{ emoji: "👍", userId: "user-1" }],
   },
   {
     id: "msg-1",
@@ -27,6 +28,7 @@ const mockMessages = [
     roomId: "room-1",
     createdAt: new Date(),
     user: { id: "user-1", username: "alice", avatarUrl: null },
+    reactions: [],
   },
 ];
 
@@ -205,6 +207,21 @@ describe("GET /rooms/:id/messages", () => {
     const body = res.json();
     expect(body.data).toHaveLength(2);
     expect(body.data[0].text).toBe("Hello");
+    await app.close();
+  });
+
+  it("aggregates each message's reactions into a ReactionSummary array", async () => {
+    const app = buildApp({ prisma: makePrisma(), jwtSecret: JWT_SECRET, refreshSecret: REFRESH_SECRET });
+    const res = await app.inject({
+      method: "GET",
+      url: "/rooms/room-1/messages",
+      headers: authHeader(),
+    });
+    const body = res.json();
+    const withReaction = body.data.find((m: { id: string }) => m.id === "msg-2");
+    expect(withReaction.reactions).toEqual([{ emoji: "👍", userIds: ["user-1"] }]);
+    const withoutReaction = body.data.find((m: { id: string }) => m.id === "msg-1");
+    expect(withoutReaction.reactions).toEqual([]);
     await app.close();
   });
 

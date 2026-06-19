@@ -83,4 +83,30 @@ describe("MessageList", () => {
     fireEvent.click(screen.getByRole("button", { name: /delete/i }));
     expect(onDelete).toHaveBeenCalledWith("msg-1");
   });
+
+  it("shows reaction pills for a message's reactions", () => {
+    const messages = [
+      makeMessage({ reactions: [{ emoji: "👍", userIds: ["user-2"] }] }),
+    ];
+    render(<MessageList messages={messages} currentUserId="user-1" />);
+    expect(screen.getByText("👍")).toBeInTheDocument();
+  });
+
+  it("calls onReact with the message id and emoji when a reaction is toggled", () => {
+    const onReact = vi.fn();
+    const messages = [
+      makeMessage({ id: "msg-1", reactions: [{ emoji: "👍", userIds: ["user-2"] }] }),
+    ];
+    render(<MessageList messages={messages} currentUserId="user-1" onReact={onReact} />);
+    fireEvent.click(screen.getByRole("button", { name: /👍 1/ }));
+    expect(onReact).toHaveBeenCalledWith("msg-1", "👍");
+  });
+
+  it("does not show reactions for deleted messages", () => {
+    const messages = [
+      makeMessage({ deletedAt: new Date().toISOString(), reactions: [{ emoji: "👍", userIds: ["user-2"] }] }),
+    ];
+    render(<MessageList messages={messages} currentUserId="user-1" />);
+    expect(screen.queryByText("👍")).not.toBeInTheDocument();
+  });
 });

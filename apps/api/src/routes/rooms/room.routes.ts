@@ -1,6 +1,7 @@
 import type { FastifyInstance } from "fastify";
 import type { AppOptions } from "../../app.js";
 import { makeAuthPreHandler } from "../../middleware/auth.middleware.js";
+import { groupReactions } from "../../services/reaction.service.js";
 import { RoomSchema } from "@stalk-talk/types";
 import { z } from "zod";
 
@@ -63,10 +64,16 @@ export const roomRoutes = async (app: FastifyInstance, opts: AppOptions) => {
         orderBy: { createdAt: "desc" },
         take: limit,
         ...(cursor ? { skip: 1, cursor: { id: cursor } } : {}),
-        include: { user: { select: { id: true, username: true, avatarUrl: true } } },
+        include: {
+          user: { select: { id: true, username: true, avatarUrl: true } },
+          reactions: { select: { emoji: true, userId: true } },
+        },
       });
 
-      const ordered = messages.slice().reverse();
+      const ordered = messages
+        .slice()
+        .reverse()
+        .map((m) => ({ ...m, reactions: groupReactions(m.reactions) }));
       const nextCursor = messages.length === limit ? messages[0]?.id : undefined;
 
       return { data: ordered, nextCursor };
