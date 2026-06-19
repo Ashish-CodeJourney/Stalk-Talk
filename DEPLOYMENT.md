@@ -28,9 +28,12 @@ No CLI is needed for Render or Supabase — both are configured via their dashbo
 ## 1. PostgreSQL — Supabase
 
 1. Sign up at [supabase.com](https://supabase.com) and create a new project.
-2. Wait for provisioning, then go to **Project Settings → Database → Connection string** → **URI**.
-3. Copy it — it looks like `postgresql://postgres.[project-ref]:[password]@aws-0-[region].pooler.supabase.com:6543/postgres`.
-4. Use the **pooled connection** (port `6543`, via PgBouncer) for `DATABASE_URL` — Render's free tier can open more connections than Supabase's free tier allows directly, and the pooler absorbs that.
+2. Wait for provisioning, then go to **Project Settings → Database → Connection string**.
+3. Select the **Session pooler** mode and copy the URI — it looks like `postgresql://postgres.[project-ref]:[password]@aws-0-[region].pooler.supabase.com:5432/postgres`.
+4. Use this for `DATABASE_URL`. Not Direct Connection, not Transaction pooler:
+   - **Direct Connection** now requires IPv6 unless you pay for Supabase's IPv4 add-on, and Render's free tier only has IPv4 egress.
+   - **Transaction pooler** (port `6543`) is for brief, stateless connections (serverless functions) and doesn't reliably support the session-level features (advisory locks, DDL) that `prisma migrate deploy` needs — which runs on every boot via the `start` script.
+   - **Session pooler** (port `5432`, same hostname) gives each connection a dedicated backend for its lifetime — works over IPv4 and supports migrations, matching Render's long-running process.
 
 ---
 
@@ -69,7 +72,7 @@ The repo includes `render.yaml` at the root, so the fastest path is a Blueprint:
 3. Render will prompt for the env vars marked `sync: false` in `render.yaml` — fill in:
 
 ```
-DATABASE_URL=postgresql://postgres.[project-ref]:[password]@aws-0-[region].pooler.supabase.com:6543/postgres
+DATABASE_URL=postgresql://postgres.[project-ref]:[password]@aws-0-[region].pooler.supabase.com:5432/postgres
 REDIS_URL=rediss://...                      # from Upstash
 JWT_SECRET=<openssl rand -base64 32>
 REFRESH_SECRET=<openssl rand -base64 32>
