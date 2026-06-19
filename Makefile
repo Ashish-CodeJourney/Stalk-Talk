@@ -77,4 +77,9 @@ deploy-web:
 	cd $(WEB_DIR) && npx vercel --prod
 
 deploy-api:
-	railway up --service api
+	@if [ -z "$$RENDER_DEPLOY_HOOK_URL" ]; then \
+		echo "Set RENDER_DEPLOY_HOOK_URL (Render dashboard → service → Settings → Deploy Hook) and re-run:"; \
+		echo "  RENDER_DEPLOY_HOOK_URL=https://api.render.com/deploy/srv-xxx?key=yyy make deploy-api"; \
+		exit 1; \
+	fi
+	curl -fsS -X POST "$$RENDER_DEPLOY_HOOK_URL"

@@ -2,6 +2,7 @@
   "name": "stalk-talk",
   "version": "0.0.0",
   "private": true,
+  "packageManager": "pnpm@10.18.0",
   "engines": {
     "node": ">=22",
     "pnpm": ">=10"

@@ -45,7 +45,7 @@ stalk-talk/
 | Auth | OAuth2 (GitHub + Google) + jsonwebtoken + bcryptjs |
 | Frontend | React 18 + Vite + Tanstack Query v5 |
 | Types | Zod schemas shared across API and web |
-| Testing | Vitest + Testing Library (120 tests) |
+| Testing | Vitest + Testing Library (197 tests) |
 
 ---
 
@@ -97,14 +97,16 @@ VITE_API_URL=http://localhost:5000
 ## Makefile Reference
 
 ```bash
-make test          # run all 120 tests
+make dev           # start Postgres + Redis + API + web together
+make stop          # kill whatever's on :5000/:5173
+make test          # run all 197 tests
 make typecheck     # TypeScript check across all packages
 make build         # compile all packages
 make db-studio     # open Prisma Studio in browser
 make db-reset      # wipe and re-migrate (dev only)
 make deploy-web    # build + vercel --prod
-make deploy-api    # railway up --service api
-make clean         # remove dist/ directories
+make deploy-api    # trigger a Render deploy via its Deploy Hook
+make clean         # stop dev servers and remove dist/ directories
 ```
 
 See all targets in [`Makefile`](Makefile).
@@ -144,7 +146,7 @@ See all targets in [`Makefile`](Makefile).
 
 ## Deployment
 
-See [`DEPLOYMENT.md`](DEPLOYMENT.md) for a step-by-step guide using free-tier services (Railway + Upstash + Vercel).
+See [`DEPLOYMENT.md`](DEPLOYMENT.md) for a step-by-step guide using free-tier services (Render + Supabase + Upstash + Vercel).
 
 ---
 

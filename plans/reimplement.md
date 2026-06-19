@@ -328,7 +328,7 @@ stalk-talk/
 - [x] User profile page
 - [x] Error boundaries
 - [x] Rate limiting (fastify-rate-limit)
-- [x] Deploy: Railway (api), Vercel (web)
+- [x] Deploy: Render + Supabase (api), Vercel (web) — switched from Railway after trial ended
 - [x] Environment variable audit (12-factor)
 
 ---
