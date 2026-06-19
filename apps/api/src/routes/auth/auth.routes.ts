@@ -43,7 +43,7 @@ export const authRoutes = async (app: FastifyInstance, opts: AppOptions) => {
     await prisma.user.update({ where: { id: user.id }, data: { refreshToken: hashedRefresh } });
 
     reply.setCookie(REFRESH_COOKIE, refreshToken, { httpOnly: true, secure: true, sameSite: "lax", path: "/" });
-    return reply.redirect(`${frontendUrl}?token=${accessToken}`);
+    return reply.redirect(`${frontendUrl}/auth/callback?token=${accessToken}`);
   });
 
   app.post("/auth/refresh", async (req, reply) => {

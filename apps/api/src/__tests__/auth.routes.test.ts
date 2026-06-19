@@ -2,6 +2,15 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { buildApp } from "../app.js";
 import type { PrismaClient } from "@prisma/client";
 
+vi.mock("../services/github.service.js", () => ({
+  fetchGitHubUser: vi.fn().mockResolvedValue({
+    id: 1,
+    login: "alice",
+    email: "alice@example.com",
+    avatar_url: "https://avatars.githubusercontent.com/u/1",
+  }),
+}));
+
 const JWT_SECRET = "test-secret-at-least-32-chars-long!!";
 const REFRESH_SECRET = "refresh-secret-at-least-32-chars!!";
 
@@ -41,6 +50,14 @@ describe("GET /auth/github/callback", () => {
     const app = buildApp({ prisma: makePrisma(), jwtSecret: JWT_SECRET, refreshSecret: REFRESH_SECRET });
     const res = await app.inject({ method: "GET", url: "/auth/github/callback" });
     expect(res.statusCode).toBe(400);
+    await app.close();
+  });
+
+  it("redirects to the frontend's auth callback route with the access token", async () => {
+    const app = buildApp({ prisma: makePrisma(), jwtSecret: JWT_SECRET, refreshSecret: REFRESH_SECRET });
+    const res = await app.inject({ method: "GET", url: "/auth/github/callback?code=abc123" });
+    expect(res.statusCode).toBe(302);
+    expect(res.headers["location"]).toMatch(/^http:\/\/localhost:5173\/auth\/callback\?token=/);
     await app.close();
   });
 });

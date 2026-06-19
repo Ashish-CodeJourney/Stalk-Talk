@@ -49,6 +49,6 @@ export const googleAuthRoutes = async (app: FastifyInstance, opts: Required<Omit
     await prisma.user.update({ where: { id: user.id }, data: { refreshToken: await hashToken(refreshToken) } });
 
     reply.setCookie(REFRESH_COOKIE, refreshToken, { httpOnly: true, secure: true, sameSite: "lax", path: "/" });
-    return reply.redirect(`${frontendUrl}?token=${accessToken}`);
+    return reply.redirect(`${frontendUrl}/auth/callback?token=${accessToken}`);
   });
 };
