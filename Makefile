@@ -1,7 +1,7 @@
 API_DIR  := apps/api
 WEB_DIR  := apps/web
 
-.PHONY: install dev dev-api dev-web build test typecheck clean stop \
+.PHONY: install dev dev-api dev-web build build-types test typecheck clean stop \
         db-up db-down db-migrate db-reset db-studio db-generate \
         deploy-web deploy-api
 
@@ -11,11 +11,17 @@ install:
 	pnpm install
 
 # ─── Development ────────────────────────────────────────────────────────────
+# apps/api resolves @stalk-talk/types via its built dist/, not source (only
+# Vite/Vitest get the "development" export condition that points at src/),
+# so dev-api needs packages/types built first - easy to forget after `make clean`.
 
-dev: db-up
+build-types:
+	pnpm --filter @stalk-talk/types build
+
+dev: db-up build-types
 	pnpm --parallel --filter @stalk-talk/api --filter @stalk-talk/web run dev
 
-dev-api:
+dev-api: build-types
 	pnpm --filter @stalk-talk/api dev
 
 dev-web:
