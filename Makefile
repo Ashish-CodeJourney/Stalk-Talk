@@ -1,7 +1,7 @@
 API_DIR  := apps/api
 WEB_DIR  := apps/web
 
-.PHONY: install dev dev-api dev-web build test typecheck clean \
+.PHONY: install dev dev-api dev-web build test typecheck clean stop \
         db-up db-down db-migrate db-reset db-studio db-generate \
         deploy-web deploy-api
 
@@ -13,9 +13,7 @@ install:
 # ─── Development ────────────────────────────────────────────────────────────
 
 dev: db-up
-	pnpm --parallel -r exec sh -c 'npm run dev 2>&1' &
-	@echo "API → http://localhost:5000  |  Web → http://localhost:5173"
-	@wait
+	pnpm --parallel --filter @stalk-talk/api --filter @stalk-talk/web run dev
 
 dev-api:
 	pnpm --filter @stalk-talk/api dev
@@ -39,9 +37,13 @@ typecheck:
 build:
 	pnpm -r build
 
-clean:
+clean: stop
 	find . -name 'dist' -not -path '*/node_modules/*' -exec rm -rf {} + 2>/dev/null || true
 	find . -name '.turbo' -not -path '*/node_modules/*' -exec rm -rf {} + 2>/dev/null || true
+
+stop:
+	@fuser -k 5000/tcp 5173/tcp 2>/dev/null || true
+	@echo "Stopped any process on :5000 (api) and :5173 (web)"
 
 # ─── Database ───────────────────────────────────────────────────────────────
 
