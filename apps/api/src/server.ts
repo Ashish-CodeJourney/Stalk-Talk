@@ -1,15 +1,17 @@
 import { buildApp } from "./app.js";
 import { createSocketServer } from "./socket/socket.server.js";
 import { PrismaClient } from "@prisma/client";
+import { PrismaPg } from "@prisma/adapter-pg";
 import Redis from "ioredis";
 
-const DATABASE_URL = process.env["DATABASE_URL"] ?? "postgresql://stalktalk:stalktalk@localhost:5432/stalktalk";
+const DATABASE_URL = process.env["DATABASE_URL"] ?? "postgresql://stalktalk:stalktalk@localhost:5433/stalktalk";
 const REDIS_URL = process.env["REDIS_URL"] ?? "redis://localhost:6379";
 const JWT_SECRET = process.env["JWT_SECRET"] ?? "dev-jwt-secret-change-in-production";
 const REFRESH_SECRET = process.env["REFRESH_SECRET"] ?? "dev-refresh-secret-change-in-production";
 const FRONTEND_URL = process.env["FRONTEND_URL"] ?? "http://localhost:5173";
 
-const prisma = new PrismaClient();
+const adapter = new PrismaPg(DATABASE_URL);
+const prisma = new PrismaClient({ adapter });
 const redis = new Redis(REDIS_URL);
 const pubClient = new Redis(REDIS_URL);
 const subClient = pubClient.duplicate();
