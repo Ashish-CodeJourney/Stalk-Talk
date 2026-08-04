@@ -1,7 +1,7 @@
 API_DIR  := apps/api
 WEB_DIR  := apps/web
 
-.PHONY: install dev dev-api dev-web build build-types test typecheck clean stop \
+.PHONY: install dev dev-api dev-web build build-types test typecheck lint format clean stop \
         db-up db-down db-migrate db-reset db-studio db-generate \
         deploy-web deploy-api
 
@@ -37,6 +37,12 @@ test-watch:
 
 typecheck:
 	pnpm -r typecheck
+
+lint:
+	pnpm -r lint
+
+format:
+	pnpm format
 
 # ─── Build ──────────────────────────────────────────────────────────────────
 

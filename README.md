@@ -101,6 +101,8 @@ make dev           # start Postgres + Redis + API + web together
 make stop          # kill whatever's on :5000/:5173
 make test          # run all 197 tests
 make typecheck     # TypeScript check across all packages
+make lint          # ESLint across all packages
+make format        # Prettier write across the repo
 make build         # compile all packages
 make db-studio     # open Prisma Studio in browser
 make db-reset      # wipe and re-migrate (dev only)
