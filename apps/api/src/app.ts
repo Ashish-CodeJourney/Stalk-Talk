@@ -17,6 +17,8 @@ export type AppOptions = {
   rateLimit?: RateLimitOptions;
 };
 
+export type AuthedRouteOptions = Required<Omit<AppOptions, "rateLimit">>;
+
 export const buildApp = (opts: AppOptions = {}) => {
   const app = Fastify();
 

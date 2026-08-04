@@ -1,12 +1,12 @@
 import type { FastifyInstance } from "fastify";
-import type { AppOptions } from "../../app.js";
+import type { AuthedRouteOptions } from "../../app.js";
 import { signAccessToken, signRefreshToken, hashToken } from "../../services/token.service.js";
 import { fetchGoogleUser } from "../../services/google.service.js";
 
 const GOOGLE_AUTHORIZE_URL = "https://accounts.google.com/o/oauth2/v2/auth";
 const REFRESH_COOKIE = "refreshToken";
 
-export const googleAuthRoutes = async (app: FastifyInstance, opts: Required<Omit<AppOptions, "rateLimit">>) => {
+export const googleAuthRoutes = async (app: FastifyInstance, opts: AuthedRouteOptions) => {
   const { prisma, jwtSecret, refreshSecret } = opts;
 
   const clientId = process.env["GOOGLE_CLIENT_ID"] ?? "dev-google-client-id";

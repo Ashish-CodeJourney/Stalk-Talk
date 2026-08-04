@@ -1,5 +1,5 @@
 import type { FastifyInstance } from "fastify";
-import type { AppOptions } from "../../app.js";
+import type { AuthedRouteOptions } from "../../app.js";
 import { makeAuthPreHandler } from "../../middleware/auth.middleware.js";
 import { groupReactions } from "../../services/reaction.service.js";
 import { RoomSchema } from "@stalk-talk/types";
@@ -14,14 +14,14 @@ const MessagesQuery = z.object({
 
 const PAGE_SIZE = 50;
 
-export const roomRoutes = async (app: FastifyInstance, opts: AppOptions) => {
+export const roomRoutes = async (app: FastifyInstance, opts: AuthedRouteOptions) => {
   const { prisma, jwtSecret } = opts;
   const auth = makeAuthPreHandler(jwtSecret);
 
   app.get("/rooms", { preHandler: auth }, async (req, _reply) => {
     const [rooms, memberships] = await Promise.all([
       prisma.room.findMany({ orderBy: { createdAt: "asc" } }),
-      prisma.roomMember.findMany({ where: { userId: req.userId } }),
+      prisma.roomMember.findMany({ where: { userId: req.userId! } }),
     ]);
 
     const unreadCounts = await Promise.all(
@@ -30,7 +30,7 @@ export const roomRoutes = async (app: FastifyInstance, opts: AppOptions) => {
         unreadCount: await prisma.message.count({
           where: {
             roomId: m.roomId,
-            userId: { not: req.userId },
+            userId: { not: req.userId! },
             createdAt: { gt: m.lastReadAt ?? m.joinedAt },
           },
         }),

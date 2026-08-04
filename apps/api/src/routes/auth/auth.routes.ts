@@ -1,12 +1,12 @@
 import type { FastifyInstance } from "fastify";
-import type { AppOptions } from "../../app.js";
+import type { AuthedRouteOptions } from "../../app.js";
 import { signAccessToken, signRefreshToken, hashToken, verifyTokenHash, verifyAccessToken } from "../../services/token.service.js";
 import { fetchGitHubUser } from "../../services/github.service.js";
 
 const GITHUB_AUTHORIZE_URL = "https://github.com/login/oauth/authorize";
 const REFRESH_COOKIE = "refreshToken";
 
-export const authRoutes = async (app: FastifyInstance, opts: AppOptions) => {
+export const authRoutes = async (app: FastifyInstance, opts: AuthedRouteOptions) => {
   const { prisma, jwtSecret, refreshSecret } = opts;
 
   const clientId = process.env["GITHUB_CLIENT_ID"] ?? "dev-client-id";
