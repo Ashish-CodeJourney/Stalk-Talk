@@ -1,7 +1,7 @@
 import { Server } from "socket.io";
 import type { Server as HttpServer } from "http";
 import type { PrismaClient } from "@prisma/client";
-import type Redis from "ioredis";
+import type { Redis } from "ioredis";
 import { createAdapter } from "@socket.io/redis-adapter";
 import { verifyAccessToken } from "../services/token.service.js";
 import { makeRoomHandlers } from "./handlers/room.handler.js";

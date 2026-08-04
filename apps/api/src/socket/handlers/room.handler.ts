@@ -1,6 +1,6 @@
 import type { Server, Socket } from "socket.io";
 import type { PrismaClient } from "@prisma/client";
-import type Redis from "ioredis";
+import type { Redis } from "ioredis";
 import { setUserOnline, setUserOffline, getOnlineUserIds } from "../../services/presence.service.js";
 
 declare module "socket.io" {

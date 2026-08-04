@@ -1,4 +1,4 @@
-import type Redis from "ioredis";
+import type { Redis } from "ioredis";
 
 export const presenceKey = (roomId: string, userId: string) =>
   `presence:${roomId}:${userId}`;

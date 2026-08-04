@@ -5,7 +5,7 @@ import {
   getOnlineUserIds,
   presenceKey,
 } from "../services/presence.service.js";
-import type Redis from "ioredis";
+import type { Redis } from "ioredis";
 
 const makeRedis = () =>
   ({

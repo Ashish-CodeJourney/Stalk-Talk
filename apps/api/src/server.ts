@@ -2,7 +2,7 @@ import { buildApp } from "./app.js";
 import { createSocketServer } from "./socket/socket.server.js";
 import { PrismaClient } from "@prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
-import Redis from "ioredis";
+import { Redis } from "ioredis";
 
 try {
   process.loadEnvFile(new URL("../.env", import.meta.url));

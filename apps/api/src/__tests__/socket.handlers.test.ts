@@ -1,9 +1,9 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect, vi } from "vitest";
 import { makeRoomHandlers } from "../socket/handlers/room.handler.js";
 import { makeMessageHandler } from "../socket/handlers/message.handler.js";
 import { makeTypingHandlers } from "../socket/handlers/typing.handler.js";
 import type { PrismaClient } from "@prisma/client";
-import type Redis from "ioredis";
+import type { Redis } from "ioredis";
 
 const makeSocket = (userId = "user-1") => {
   const toMock = { emit: vi.fn() };
