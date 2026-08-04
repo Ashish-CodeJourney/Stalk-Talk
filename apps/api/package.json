@@ -35,7 +35,7 @@
     "@types/bcryptjs": "^3.0.0",
     "@types/jsonwebtoken": "^9.0.10",
     "@types/node": "^22.15.29",
-    "@types/pg": "^8.20.0",
+    "@types/pg": "^8.20.3",
     "tsx": "^4.19.3",
     "vitest": "^3.2.4"
   }
