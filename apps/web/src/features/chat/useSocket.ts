@@ -18,5 +18,9 @@ export const useSocket = (token: string | null): Socket | null => {
     };
   }, [token]);
 
+  // Ref access during render: consumers re-render on socket events (messages/presence/typing),
+  // which is when this picks up the connected socket. Converting to state is a real fix but
+  // changes connect/reconnect timing for every consumer — needs its own pass, not a lint fixup.
+  // eslint-disable-next-line react-hooks/refs
   return socketRef.current;
 };

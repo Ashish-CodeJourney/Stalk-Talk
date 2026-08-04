@@ -15,6 +15,9 @@ export const AuthCallback = () => {
     } else {
       navigate("/", { replace: true });
     }
+    // Run once on mount only: this consumes a one-time OAuth redirect token. Re-running on
+    // param/login/navigate identity changes would double-fire login() or bounce navigation.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return null;
