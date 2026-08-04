@@ -12,7 +12,7 @@ export const ChatPage = () => {
   const queryClient = useQueryClient();
   const [showCreate, setShowCreate] = useState(false);
 
-  const handleCreated = (room: Room) => {
+  const handleCreated = (_room: Room) => {
     queryClient.invalidateQueries({ queryKey: ["rooms"] });
     setShowCreate(false);
   };
